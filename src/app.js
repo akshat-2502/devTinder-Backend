@@ -1,15 +1,20 @@
 require("dotenv").config();
 const express = require("express");
+const { userAuth } = require("./middleware/auth");
 const connectDB = require("./config/database");
 const User = require("./models/user");
+
 const bcrypt = require("bcrypt");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 const validator = require("validator");
 const { validateSignUpData } = require("./utils/validation");
 
-const { adminAuth } = require("./middleware/auth");
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 
+//signup api
 app.post("/signup", async (req, res) => {
   try {
     //VALIDATION OF DATA
@@ -48,8 +53,11 @@ app.post("/login", async (req, res) => {
     if (!user) {
       throw new Error("No user found with that email");
     }
-    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    const isPasswordCorrect = await user.validatePassword(password);
     if (isPasswordCorrect) {
+      //creating a token
+      const token = await user.getJWTToken();
+      res.cookie("token", token);
       res.send("Login Successful");
     } else {
       throw new Error("Invalid Credentials");
@@ -62,36 +70,14 @@ app.post("/login", async (req, res) => {
   }
 });
 
-//get user by email
-app.get("/user", async (req, res) => {
-  const userEmail = req.body.email;
+//profile api
+app.get("/profile", userAuth, async (req, res) => {
   try {
-    const user = await User.findOne({ email: userEmail });
-    if (user) {
-      res.send(user);
-    } else {
-      res.send("No User Found with that email");
-    }
+    const user = req.user;
+    res.send(user);
   } catch (error) {
     res.status(400).json({
-      message: "Error fetching the user",
-      error: error.message,
-    });
-  }
-});
-
-//get all users
-app.get("/feed", async (req, res) => {
-  try {
-    const users = await User.find({});
-    if (users.length > 0) {
-      res.send(users);
-    } else {
-      res.send("No Users Found");
-    }
-  } catch (error) {
-    res.status(400).json({
-      message: "Something went wrong,",
+      message: "Something went wrong",
       error: error.message,
     });
   }
