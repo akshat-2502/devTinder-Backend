@@ -13,6 +13,26 @@ const validateSignUpData = (req) => {
   }
 };
 
+const validateEditProfileData = (req) => {
+  const allowedFields = [
+    "firstName",
+    "lastName",
+    "age",
+    "gender",
+    "profilePhotoUrl",
+    "about",
+    "skills",
+  ];
+  const data = req.body;
+  const validateFields = Object.keys(data).every((key) =>
+    allowedFields.includes(key),
+  );
+  if (!validateFields) {
+    throw new Error("Invalid Fields in the request body");
+  }
+};
+
 module.exports = {
   validateSignUpData,
+  validateEditProfileData,
 };

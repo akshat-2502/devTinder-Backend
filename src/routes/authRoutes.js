@@ -61,4 +61,9 @@ authRouter.post("/login", async (req, res) => {
   }
 });
 
+//logout api
+authRouter.post("/logout", (req, res) => {
+  res.clearCookie("token").send("Logout Successful");
+});
+
 module.exports = authRouter;

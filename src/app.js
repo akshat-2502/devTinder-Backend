@@ -11,6 +11,7 @@ const validator = require("validator");
 const { validateSignUpData } = require("./utils/validation");
 const authRouter = require("./routes/authRoutes");
 const profileRoutes = require("./routes/profileRoutes");
+const requestRouter = require("./routes/requestRoutes");
 
 const app = express();
 app.use(express.json());
@@ -20,6 +21,8 @@ app.use(cookieParser());
 app.use("/", authRouter);
 //profile router
 app.use("/", profileRoutes);
+//request router
+app.use("/", requestRouter);
 
 app.delete("/user", async (req, res) => {
   const userEmail = req.body.email;
